@@ -1,0 +1,191 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  
+  --color-ink: #1a1a1a;
+  --color-paper: #fffbf7;
+  --color-accent: #c45d3a;
+  --color-accent-light: #fff5f0;
+  --color-muted: #7a7a7a;
+  --color-border: #e8e4e0;
+  
+  /* Warm gradient backgrounds */
+  --gradient-warm: linear-gradient(135deg, #fff5f0 0%, #fffbf7 50%, #f5efe8 100%);
+  --gradient-accent: linear-gradient(135deg, #c45d3a 0%, #d4826a 100%);
+}
+
+@layer base {
+  * {
+    @apply antialiased;
+  }
+  
+  html {
+    @apply scroll-smooth;
+    font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+  }
+  
+  body {
+    @apply bg-paper text-ink font-body;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-bold tracking-tight;
+    line-height: 1;
+  }
+  
+  ::selection {
+    background: var(--color-accent);
+    color: white;
+  }
+}
+
+@layer components {
+  .container-wide {
+    @apply max-w-[1800px] mx-auto px-6 sm:px-12 lg:px-24;
+  }
+  
+  .container-narrow {
+    @apply max-w-[1200px] mx-auto px-6 sm:px-12;
+  }
+  
+  .text-display {
+    font-size: clamp(3rem, 12vw, 10rem);
+    line-height: 0.85;
+    letter-spacing: -0.04em;
+  }
+  
+  .text-headline {
+    font-size: clamp(2rem, 6vw, 4.5rem);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+  }
+  
+  .text-title {
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  
+  .text-body-lg {
+    @apply text-lg sm:text-xl leading-relaxed;
+  }
+  
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-8 py-4 bg-accent text-white font-medium rounded-full;
+    @apply hover:bg-accent/90 active:scale-[0.98] transition-all duration-300 shadow-lg shadow-accent/20;
+  }
+  
+  .btn-outline {
+    @apply inline-flex items-center justify-center px-8 py-4 border-2 border-ink/20 text-ink font-medium rounded-full;
+    @apply hover:bg-ink hover:text-paper hover:border-ink transition-all duration-300;
+  }
+  
+  .btn-ghost {
+    @apply inline-flex items-center justify-center px-6 py-3 text-accent font-medium rounded-full;
+    @apply hover:bg-accent/10 transition-all duration-300;
+  }
+  
+  .link-underline {
+    @apply relative inline-block;
+  }
+  
+  .link-underline::after {
+    content: '';
+    @apply absolute left-0 bottom-0 w-full h-px bg-accent origin-left;
+    @apply scale-x-0 transition-transform duration-500;
+  }
+  
+  .link-underline:hover::after {
+    @apply scale-x-100;
+  }
+  
+  .card-warm {
+    @apply bg-white rounded-3xl border border-border shadow-sm;
+    @apply hover:shadow-xl hover:shadow-accent/5 transition-all duration-500;
+  }
+}
+
+@layer utilities {
+  .section-gap {
+    @apply py-24 sm:py-32 lg:py-40;
+  }
+  
+  .bg-warm {
+    background: var(--gradient-warm);
+  }
+  
+  .fade-up {
+    @apply opacity-0 translate-y-8;
+    animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  
+  .stagger-1 { animation-delay: 0.1s; }
+  .stagger-2 { animation-delay: 0.2s; }
+  .stagger-3 { animation-delay: 0.3s; }
+  .stagger-4 { animation-delay: 0.4s; }
+  
+  @keyframes fadeUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .mask-fade-b {
+    mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  }
+  
+  .text-muted {
+    color: var(--color-muted);
+  }
+  
+  .border-subtle {
+    border-color: var(--color-border);
+  }
+  
+  .text-accent {
+    color: var(--color-accent);
+  }
+  
+  .bg-accent {
+    background-color: var(--color-accent);
+  }
+  
+  .bg-accent-light {
+    background-color: var(--color-accent-light);
+  }
+}
+
+/* Premium scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-paper);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted);
+}
+
+/* Hide scrollbar on mobile */
+@media (max-width: 768px) {
+  body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  body::-webkit-scrollbar {
+    display: none;
+  }
+}
