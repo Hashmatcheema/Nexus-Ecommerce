@@ -15,7 +15,7 @@ const navItems = [
 export default function MobileBottomNav() {
   const pathname = usePathname()
   const { cart, setIsCartOpen } = useApp()
-  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
+  const cartCount = cart.reduce((sum: number, item) => sum + item.quantity, 0)
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-paper border-t border-subtle z-40">

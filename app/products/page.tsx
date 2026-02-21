@@ -17,13 +17,13 @@ interface ProductsPageProps {
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const page = Number(searchParams.page) || 1
-  const sort = typeof searchParams.sort === 'string' ? searchParams.sort : 'newest'
+  const sort = (typeof searchParams.sort === 'string' ? searchParams.sort : 'newest') as 'newest' | 'price-asc' | 'price-desc' | 'popular'
   const search = typeof searchParams.search === 'string' ? searchParams.search : undefined
   const category = typeof searchParams.category === 'string' ? searchParams.category : undefined
   const view = typeof searchParams.view === 'string' ? searchParams.view : '4'
 
   const [{ products, total, pages }, categories] = await Promise.all([
-    getProducts({ page, sort, search, category }),
+    getProducts({ page, sort, limit: 12, search, category }),
     getCategories(),
   ])
 

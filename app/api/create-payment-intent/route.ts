@@ -3,12 +3,15 @@ import { auth } from '@clerk/nextjs/server'
 import prisma from '@/lib/prisma'
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2026-01-28.clover',
-})
+function getStripe(): Stripe {
+    const key = process.env.STRIPE_SECRET_KEY
+    if (!key) throw new Error('STRIPE_SECRET_KEY is not set')
+    return new Stripe(key, { apiVersion: '2026-01-28.clover' })
+}
 
 export async function POST(req: NextRequest) {
     try {
+        const stripe = getStripe()
         const { userId } = await auth()
         if (!userId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

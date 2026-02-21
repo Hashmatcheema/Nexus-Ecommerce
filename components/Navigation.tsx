@@ -45,7 +45,7 @@ export default function Navigation() {
   const [megaMenuOpen, setMegaMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const { cart, setIsCartOpen } = useApp()
-  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
+  const cartCount = cart.reduce((sum: number, item) => sum + item.quantity, 0)
   const pathname = usePathname()
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')

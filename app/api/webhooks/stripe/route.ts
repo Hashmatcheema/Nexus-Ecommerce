@@ -3,25 +3,25 @@ import prisma from '@/lib/prisma'
 import Stripe from 'stripe'
 import { headers } from 'next/headers'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2026-01-28.clover',
-})
-
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!
+function getStripe(): Stripe {
+    const key = process.env.STRIPE_SECRET_KEY
+    if (!key) throw new Error('STRIPE_SECRET_KEY is not set')
+    return new Stripe(key, { apiVersion: '2026-01-28.clover' })
+}
 
 export async function POST(req: NextRequest) {
     const body = await req.text()
     const sig = headers().get('stripe-signature') as string
+    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET
 
     let event: Stripe.Event
 
     try {
         if (!sig || !endpointSecret) {
-            // If no secret (dev mode/not set), we might fail or log. 
-            // For now, let's assume valid config is required.
             console.error('Missing stripe signature or endpoint secret')
             return NextResponse.json({ error: 'Webhook Error: Missing config' }, { status: 400 })
         }
+        const stripe = getStripe()
         event = stripe.webhooks.constructEvent(body, sig, endpointSecret)
     } catch (err: any) {
         console.error(`Webhook Signature Verification Failed: ${err.message}`)
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
                 }
 
                 // 2. Calculate final totals (redundant check, but good for data integrity)
-                const total = cartItems.reduce((sum, item) => {
+                const total = cartItems.reduce((sum: number, item) => {
                     const price = item.variant ? (item.product.price.toNumber() + item.variant.priceDiff.toNumber()) : item.product.price.toNumber()
                     return sum + (price * item.quantity)
                 }, 0)
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
                         // For now, we will store a placeholder or extract from Stripe payment_method_details if possible/needed.
                         // Let's use a dummy object if missing, or maybe we should have passed it in metadata?
                         // Stripe Charge object has shipping. PaymentIntent has shipping.
-                        shippingAddress: paymentIntent.shipping || {},
+                        shippingAddress: JSON.parse(JSON.stringify(paymentIntent.shipping || {})),
                     }
                 })
 

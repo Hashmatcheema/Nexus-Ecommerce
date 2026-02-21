@@ -229,8 +229,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [favorites]
   )
 
-  const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
-  const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0)
+  const cartTotal = cart.reduce((sum: number, item) => sum + item.price * item.quantity, 0)
+  const cartItemCount = cart.reduce((sum: number, item) => sum + item.quantity, 0)
 
   return (
     <AppContext.Provider

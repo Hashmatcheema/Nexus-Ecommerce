@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { allProducts, categories } from './data'
+import { allProducts, categories } from '../lib/data'
 
 const prisma = new PrismaClient()
 
@@ -47,7 +47,6 @@ async function main() {
                 price: product.price,
                 images: [product.image, ...(product.images || [])],
                 categoryId: category.id,
-                slug: product.name.toLowerCase().replace(/ /g, '-'),
             },
         })
 
@@ -58,13 +57,13 @@ async function main() {
                     const variantName = `${color} / ${size}`
                     await prisma.variant.upsert({
                         where: {
-                            sku: `${createdProduct.slug}-${color}-${size}`.toLowerCase().replace(/ /g, '-')
+                            sku: `${product.name.toLowerCase().replace(/ /g, '-')}-${color}-${size}`.toLowerCase().replace(/ /g, '-')
                         },
                         update: {},
                         create: {
                             productId: createdProduct.id,
                             name: variantName,
-                            sku: `${createdProduct.slug}-${color}-${size}`.toLowerCase().replace(/ /g, '-'),
+                            sku: `${product.name.toLowerCase().replace(/ /g, '-')}-${color}-${size}`.toLowerCase().replace(/ /g, '-'),
                             stock: 100, // Default stock
                             priceDiff: 0,
                         },
@@ -76,13 +75,13 @@ async function main() {
                 const variantName = `${color}`
                 await prisma.variant.upsert({
                     where: {
-                        sku: `${createdProduct.slug}-${color}`.toLowerCase().replace(/ /g, '-')
+                        sku: `${product.name.toLowerCase().replace(/ /g, '-')}-${color}`.toLowerCase().replace(/ /g, '-')
                     },
                     update: {},
                     create: {
                         productId: createdProduct.id,
                         name: variantName,
-                        sku: `${createdProduct.slug}-${color}`.toLowerCase().replace(/ /g, '-'),
+                        sku: `${product.name.toLowerCase().replace(/ /g, '-')}-${color}`.toLowerCase().replace(/ /g, '-'),
                         stock: 100, // Default stock
                         priceDiff: 0,
                     },
