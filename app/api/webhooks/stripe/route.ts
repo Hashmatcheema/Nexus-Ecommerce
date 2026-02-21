@@ -3,6 +3,8 @@ import prisma from '@/lib/prisma'
 import Stripe from 'stripe'
 import { headers } from 'next/headers'
 
+type PrismaTransaction = Parameters<Parameters<typeof prisma.$transaction>[0]>[0]
+
 function getStripe(): Stripe {
     const key = process.env.STRIPE_SECRET_KEY
     if (!key) throw new Error('STRIPE_SECRET_KEY is not set')
@@ -44,7 +46,7 @@ export async function POST(req: NextRequest) {
 
         try {
             // Start Transaction
-            await prisma.$transaction(async (tx) => {
+            await prisma.$transaction(async (tx: PrismaTransaction) => {
                 // 1. Fetch Cart Items
                 const cartItems = await tx.cartItem.findMany({
                     where: { cartId: cartId },
