@@ -51,10 +51,8 @@ export async function GET(req: NextRequest) {
         return NextResponse.json(formattedItems)
     } catch (error) {
         console.error('Error fetching cart:', error)
-        if (isDbConnectionError(error)) {
-            return NextResponse.json([])
-        }
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+        // Return empty cart on any DB/auth error so the app never crashes (e.g. missing DB, tables not migrated)
+        return NextResponse.json([])
     }
 }
 

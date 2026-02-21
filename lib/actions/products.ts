@@ -17,14 +17,6 @@ export interface Product {
 
 export type GetProductsParams = ProductFilterParams
 
-function isDbConnectionError(error: unknown): boolean {
-    if (error && typeof error === 'object' && 'code' in error) {
-        const code = (error as { code?: string }).code
-        return code === 'ECONNREFUSED' || code === 'P1001'
-    }
-    return false
-}
-
 function getProductsFallback(params: GetProductsParams) {
     const parsed = productFilterSchema.safeParse(params)
     const { page = 1, limit = 12, sort = 'newest', search, category } = parsed.success ? parsed.data : { page: 1, limit: 12, sort: 'newest' as const, search: undefined, category: undefined }
@@ -118,11 +110,8 @@ export async function getProducts(params: GetProductsParams) {
             currentPage: page,
         }
     } catch (error) {
-        if (isDbConnectionError(error)) {
-            console.warn('Database unavailable, using static product data.')
-            return getProductsFallback(params)
-        }
-        throw error
+        console.warn('Database error (products), using static product data:', error)
+        return getProductsFallback(params)
     }
 }
 
@@ -135,10 +124,7 @@ export async function getCategories() {
         type CategoryName = (typeof categories)[number]
         return ['All', ...categories.map((c: CategoryName) => c.name)]
     } catch (error) {
-        if (isDbConnectionError(error)) {
-            console.warn('Database unavailable, using static categories.')
-            return staticCategories
-        }
-        throw error
+        console.warn('Database error (categories), using static categories:', error)
+        return staticCategories
     }
 }
