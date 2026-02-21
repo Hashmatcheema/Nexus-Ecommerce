@@ -132,7 +132,8 @@ export async function getCategories() {
             orderBy: { name: 'asc' },
             select: { name: true },
         })
-        return ['All', ...categories.map(c => c.name)]
+        type CategoryName = (typeof categories)[number]
+        return ['All', ...categories.map((c: CategoryName) => c.name)]
     } catch (error) {
         if (isDbConnectionError(error)) {
             console.warn('Database unavailable, using static categories.')
