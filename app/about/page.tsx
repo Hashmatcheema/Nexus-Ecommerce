@@ -40,9 +40,9 @@ const stats = [
 ]
 
 const team = [
-  { name: 'Sarah Chen', role: 'Founder & CEO', image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400' },
-  { name: 'Marcus Webb', role: 'Creative Director', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400' },
-  { name: 'Elena Rodriguez', role: 'Head of Design', image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400' },
+  { name: 'Sarah Chen', role: 'Founder & CEO', image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120' },
+  { name: 'Marcus Webb', role: 'Creative Director', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120' },
+  { name: 'Elena Rodriguez', role: 'Head of Design', image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=120' },
 ]
 
 export default function AboutPage() {
@@ -57,20 +57,21 @@ export default function AboutPage() {
   return (
     <main className="min-h-screen bg-paper">
       <Navigation />
-      
+
       {/* Hero */}
-      <section ref={heroRef} className="relative h-screen flex items-center overflow-hidden">
+      <section ref={heroRef} className="relative h-screen flex items-center overflow-hidden" style={{ position: 'relative' }}>
         <motion.div style={{ y }} className="absolute inset-0">
           <Image
             src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920"
             alt="About Nexus"
             fill
+            sizes="100vw"
             className="object-cover"
             priority
           />
           <div className="absolute inset-0 bg-gradient-to-r from-ink/80 via-ink/50 to-transparent" />
         </motion.div>
-        
+
         <motion.div style={{ opacity }} className="container-wide relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
@@ -87,7 +88,7 @@ export default function AboutPage() {
               <span className="text-accent"> Matters</span>
             </h1>
             <p className="text-xl text-white/80 leading-relaxed">
-              Founded in 2020, we set out to create a fashion brand that prioritizes quality, 
+              Founded in 2020, we set out to create a fashion brand that prioritizes quality,
               sustainability, and timeless design over fleeting trends.
             </p>
           </motion.div>
@@ -147,12 +148,12 @@ export default function AboutPage() {
                 <span className="text-accent"> Your Story</span>
               </h2>
               <p className="text-muted text-lg leading-relaxed mb-6">
-                We believe fashion should be an expression of who you are – not just what&apos;s 
-                trending. That&apos;s why we focus on creating versatile pieces that work with 
+                We believe fashion should be an expression of who you are – not just what&apos;s
+                trending. That&apos;s why we focus on creating versatile pieces that work with
                 your existing wardrobe and grow with you over time.
               </p>
               <p className="text-muted leading-relaxed mb-8">
-                Every garment is thoughtfully designed in our studio and produced in small 
+                Every garment is thoughtfully designed in our studio and produced in small
                 batches by skilled artisans who share our commitment to excellence.
               </p>
               <Link href="/products" className="btn-primary inline-flex items-center gap-2 group">
@@ -173,6 +174,7 @@ export default function AboutPage() {
                   src="https://images.unsplash.com/photo-1445205170230-053b83016050?w=600"
                   alt="Our craftsmanship"
                   fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-cover"
                 />
               </div>
@@ -181,6 +183,7 @@ export default function AboutPage() {
                   src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600"
                   alt="Our materials"
                   fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-cover"
                 />
               </div>
@@ -248,7 +251,7 @@ export default function AboutPage() {
             </h2>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="max-w-xl mx-auto grid grid-cols-3 gap-3">
             {team.map((member, index) => (
               <motion.div
                 key={member.name}
@@ -256,19 +259,20 @@ export default function AboutPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="group"
+                className="group text-center"
               >
-                <div className="relative aspect-[3/4] rounded-2xl overflow-hidden mb-6">
+                <div className="relative aspect-square max-w-[100px] mx-auto rounded-xl overflow-hidden mb-2">
                   <Image
                     src={member.image}
                     alt={member.name}
                     fill
+                    sizes="100px"
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-ink/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
-                <h3 className="text-xl font-display font-bold mb-1">{member.name}</h3>
-                <p className="text-muted">{member.role}</p>
+                <h3 className="text-sm font-display font-bold mb-0.5">{member.name}</h3>
+                <p className="text-xs text-muted">{member.role}</p>
               </motion.div>
             ))}
           </div>

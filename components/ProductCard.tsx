@@ -35,13 +35,12 @@ export default function ProductCard({ product, priority = false, index = 0 }: Pr
             src={product.image}
             alt={product.name}
             fill
-            className={`object-cover transition-all duration-700 ease-out group-hover:scale-105 ${
-              imageLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover transition-transform duration-700 group-hover:scale-110"
             onLoad={() => setImageLoaded(true)}
             priority={priority}
           />
-          
+
           {/* Category tag */}
           {product.category && (
             <div className="absolute top-4 left-4">
@@ -64,6 +63,7 @@ export default function ProductCard({ product, priority = false, index = 0 }: Pr
                 addToCart(product)
               }}
               className="flex-1 py-3 bg-ink text-white text-sm font-medium rounded-full hover:bg-ink/90 transition-colors flex items-center justify-center gap-2"
+              aria-label={`Add ${product.name} to cart`}
             >
               <ShoppingBag className="w-4 h-4" />
               Add to Cart
@@ -73,11 +73,11 @@ export default function ProductCard({ product, priority = false, index = 0 }: Pr
                 e.preventDefault()
                 toggleFavorite(product.id)
               }}
-              className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
-                favorited 
-                  ? 'bg-accent text-white' 
-                  : 'bg-white text-ink hover:bg-gray-100'
-              }`}
+              className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${favorited
+                ? 'bg-accent text-white'
+                : 'bg-white text-ink hover:bg-gray-100'
+                }`}
+              aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
             >
               <Heart className={`w-4 h-4 ${favorited ? 'fill-current' : ''}`} />
             </button>

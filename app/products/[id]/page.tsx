@@ -22,7 +22,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   const productId = parseInt(params.id)
   const product = getProductById(productId) || allProducts[0]
   const relatedProducts = allProducts.filter(p => p.category === product.category && p.id !== product.id).slice(0, 3)
-  
+
   const { addToCart, toggleFavorite, isFavorite } = useApp()
   const [selectedImage, setSelectedImage] = useState(0)
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[2] || 'M')
@@ -35,7 +35,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
   return (
     <main className="min-h-screen bg-paper">
       <Navigation />
-      
+
       <section className="pt-28 pb-24">
         <div className="container-wide">
           {/* Back link */}
@@ -66,6 +66,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                   src={images[selectedImage]}
                   alt={product.name}
                   fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                   className="object-cover"
                   priority
                 />
@@ -80,14 +81,14 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index)}
-                    className={`relative aspect-[3/4] bg-warm-100 rounded-2xl overflow-hidden transition-all ${
-                      selectedImage === index ? 'ring-2 ring-accent' : 'opacity-60 hover:opacity-100'
-                    }`}
+                    className={`relative aspect-[3/4] bg-warm-100 rounded-2xl overflow-hidden transition-all ${selectedImage === index ? 'ring-2 ring-accent' : 'opacity-60 hover:opacity-100'
+                      }`}
                   >
                     <Image
                       src={image}
                       alt={`${product.name} ${index + 1}`}
                       fill
+                      sizes="25vw"
                       className="object-cover"
                     />
                   </button>
@@ -105,9 +106,9 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
               <span className="text-xs font-medium tracking-[0.3em] uppercase text-accent block mb-4">
                 {product.category}
               </span>
-              
+
               <h1 className="text-title font-display mb-4">{product.name}</h1>
-              
+
               <div className="flex items-baseline gap-3 mb-6">
                 <span className="font-display text-3xl font-bold text-accent">
                   ${product.price}
@@ -132,11 +133,10 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                       <button
                         key={color}
                         onClick={() => setSelectedColor(color)}
-                        className={`px-5 py-2.5 text-sm font-medium border rounded-full transition-all ${
-                          selectedColor === color
+                        className={`px-5 py-2.5 text-sm font-medium border rounded-full transition-all ${selectedColor === color
                             ? 'border-accent bg-accent text-white'
                             : 'border-border hover:border-ink'
-                        }`}
+                          }`}
                       >
                         {color}
                       </button>
@@ -154,11 +154,10 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                       <button
                         key={size}
                         onClick={() => setSelectedSize(size)}
-                        className={`w-12 h-12 text-sm font-medium border rounded-full transition-all ${
-                          selectedSize === size
+                        className={`w-12 h-12 text-sm font-medium border rounded-full transition-all ${selectedSize === size
                             ? 'border-accent bg-accent text-white'
                             : 'border-border hover:border-ink'
-                        }`}
+                          }`}
                       >
                         {size}
                       </button>
@@ -197,9 +196,8 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                 </button>
                 <button
                   onClick={() => toggleFavorite(product.id)}
-                  className={`w-14 h-14 rounded-full border flex items-center justify-center transition-colors ${
-                    favorited ? 'bg-accent border-accent text-white' : 'border-border hover:border-ink'
-                  }`}
+                  className={`w-14 h-14 rounded-full border flex items-center justify-center transition-colors ${favorited ? 'bg-accent border-accent text-white' : 'border-border hover:border-ink'
+                    }`}
                 >
                   <Heart className={`w-5 h-5 ${favorited ? 'fill-current' : ''}`} />
                 </button>
@@ -250,6 +248,7 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
                         src={review.avatar}
                         alt={review.name}
                         fill
+                        sizes="48px"
                         className="object-cover"
                       />
                     </div>

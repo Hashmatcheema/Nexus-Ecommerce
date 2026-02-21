@@ -71,8 +71,8 @@ export default function CartDrawer() {
                 <div className="flex items-center gap-2 mb-2">
                   <Truck className={`w-4 h-4 ${progressToFreeShipping >= 100 ? 'text-green-600' : 'text-accent'}`} />
                   <span className="text-sm font-medium">
-                    {progressToFreeShipping >= 100 
-                      ? "You've unlocked free shipping! 🎉" 
+                    {progressToFreeShipping >= 100
+                      ? "You've unlocked free shipping! 🎉"
                       : `$${amountToFreeShipping.toFixed(0)} away from free shipping`
                     }
                   </span>
@@ -88,7 +88,7 @@ export default function CartDrawer() {
             )}
 
             {/* Items */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto relative min-h-0">
               {cart.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center px-6">
                   <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-6">
@@ -123,7 +123,8 @@ export default function CartDrawer() {
                           src={item.image}
                           alt={item.name}
                           fill
-                          className="object-cover"
+                          sizes="96px"
+                          className="object-cover object-center"
                         />
                       </Link>
                       <div className="flex-1 min-w-0">

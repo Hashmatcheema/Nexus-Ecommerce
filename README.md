@@ -13,16 +13,22 @@ A stunning, portfolio-ready e-commerce website built with Next.js 14, TypeScript
 
 ```bash
 # Clone the repository
-git clone https://github.com/rubabzahra13/Nexus-Ecommerce.git
+git clone https://github.com/Hashmatcheema/Nexus-Ecommerce.git
 
 # Navigate to project
 cd Nexus-Ecommerce
 
-# Install dependencies
-npm install
+# Install dependencies (pnpm)
+pnpm install
 
 # Run development server
-npm run dev
+pnpm dev
+```
+
+For a clean build (clears `.next` cache and starts dev):
+
+```bash
+pnpm run dev:clean
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
@@ -35,22 +41,23 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ├── app/                    # Next.js App Router pages
 │   ├── page.tsx            # Homepage
 │   ├── products/           # Products listing & detail pages
-│   ├── collections/        # Collections page
-│   ├── sale/               # Sale page with countdown
-│   ├── checkout/           # Multi-step checkout
-│   ├── account/            # User account dashboard
+│   ├── collections/       # Collections & sub-collections
+│   ├── sale/               # Sale page
+│   ├── checkout/           # Multi-step checkout (Stripe)
+│   ├── account/            # User account (orders, addresses)
 │   ├── about/              # About page
-│   ├── orders/             # Order history
 │   ├── admin/              # Admin dashboard (placeholder)
+│   ├── api/                # API routes (cart, payment intent, webhooks)
 │   ├── layout.tsx          # Root layout
 │   └── globals.css         # Global styles & CSS variables
 │
 ├── components/             # Reusable React components
-│   ├── Navigation.tsx      # Header with mega menu
+│   ├── Navigation.tsx      # Header with mega menu & mobile drawer
 │   ├── Footer.tsx          # Footer with newsletter
 │   ├── Hero.tsx            # Homepage hero section
 │   ├── ProductCard.tsx     # Product card with hover effects
 │   ├── ProductGrid.tsx     # Best sellers grid
+│   ├── products/           # ProductFilters, Pagination
 │   ├── FeaturedCollection.tsx  # New arrivals bento grid
 │   ├── FeaturesShowcase.tsx    # Brand values section
 │   ├── PromotionalBanner.tsx   # Sale promo cards
@@ -59,18 +66,24 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 │   ├── CartDrawer.tsx      # Slide-out cart
 │   ├── AIAssistantOrb.tsx  # Floating AI button
 │   ├── AIAssistantModal.tsx    # AI chat interface
-│   ├── MobileBottomNav.tsx # Mobile navigation
-│   └── QuickViewModal.tsx  # Product quick view
+│   ├── ErrorBoundary.tsx   # Error boundary
+│   ├── PlaceholderPage.tsx # Placeholder for stub pages
+│   └── ui/sonner.tsx       # Toast notifications
 │
 ├── contexts/               # React Context providers
-│   └── AppContext.tsx      # Global state (cart, favorites, etc.)
+│   └── AppContext.tsx      # Global state (cart, favorites, auth)
 │
-├── lib/                    # Utilities & data
-│   └── data.ts             # Mock product/collection data
+├── lib/                    # Utilities, data & server logic
+│   ├── data.ts             # Static product/collection data (fallback)
+│   ├── prisma.ts           # Prisma client (PostgreSQL)
+│   ├── actions/            # Server actions (products, user)
+│   └── validation.ts      # Zod schemas
 │
-├── hooks/                  # Custom React hooks
-│   └── useIntersectionObserver.ts
+├── prisma/                 # Database
+│   ├── schema.prisma       # Prisma 7 schema
+│   └── migrations/         # Migrations
 │
+├── prisma.config.ts        # Prisma 7 datasource URL (for CLI)
 └── public/                 # Static assets
 ```
 
@@ -142,13 +155,35 @@ Defined in `app/globals.css` and `tailwind.config.js`:
 
 ### Environment Variables
 
-Create a `.env.local` file for any API keys (currently using mock data):
+Copy `.env.example` to `.env` and fill in values:
 
 ```env
-# Future integrations
-NEXT_PUBLIC_STRIPE_KEY=your_stripe_key
-NEXT_PUBLIC_API_URL=your_api_url
+# App
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Database (PostgreSQL) — required for cart/orders when DB is up
+DATABASE_URL="postgresql://user:password@localhost:5432/nexus_ecommerce?schema=public"
+
+# Auth (Clerk) — required for sign-in and account
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/
+NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/
+
+# Payments (Stripe) — required for checkout
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+# Email (Resend) — optional
+RESEND_API_KEY=re_...
 ```
+
+Without the database, the app still runs using static product data and local cart. Without Stripe keys, checkout shows a configuration message.
+
+**Database setup (optional):** Set `DATABASE_URL` in `.env`, then run `pnpm prisma generate` and `pnpm prisma migrate dev` to create tables. Use `pnpm prisma db seed` to seed products if a seed script is configured.
 
 ### Tailwind Config
 
@@ -178,16 +213,16 @@ module.exports = {
 
 ### Adding Images
 
-Images use Next.js Image component with Unsplash. Update `next.config.js` to add new domains:
+Images use the Next.js `Image` component. Allowed origins are in `next.config.js` under `images.remotePatterns`. To add a new host:
 
 ```javascript
-module.exports = {
-  images: {
-    remotePatterns: [
-      { protocol: 'https', hostname: 'images.unsplash.com' },
-      { protocol: 'https', hostname: 'your-cdn.com' },
-    ],
-  },
+// next.config.js
+images: {
+  remotePatterns: [
+    { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
+    { protocol: 'https', hostname: 'res.cloudinary.com', pathname: '/**' },
+    { protocol: 'https', hostname: 'your-cdn.com', pathname: '/**' },
+  ],
 }
 ```
 
@@ -282,10 +317,13 @@ export default function MyComponent({ title, children }: MyComponentProps) {
 ## 🛠️ Available Scripts
 
 ```bash
-npm run dev      # Start development server
-npm run build    # Build for production
-npm run start    # Start production server
-npm run lint     # Run ESLint
+pnpm dev          # Start development server
+pnpm run dev:clean # Delete .next and start dev (use if chunks 404)
+pnpm build        # Build for production
+pnpm start        # Start production server
+pnpm lint         # Run ESLint
+pnpm type-check   # TypeScript check (tsc --noEmit)
+pnpm test         # Run Jest tests
 ```
 
 ---
@@ -293,34 +331,43 @@ npm run lint     # Run ESLint
 ## 📦 Dependencies
 
 ### Core
-- `next` - React framework
+- `next` (14.x) - React framework with App Router
 - `react` / `react-dom` - UI library
 - `typescript` - Type safety
 
-### Styling
+### Auth & Data
+- `@clerk/nextjs` - Authentication (sign-in, user account)
+- `@prisma/client` / `prisma` - Database ORM (PostgreSQL)
+- `@prisma/adapter-pg` - Prisma driver adapter for `pg`
+
+### Payments
+- `stripe` / `@stripe/stripe-js` / `@stripe/react-stripe-js` - Checkout
+
+### Styling & UI
 - `tailwindcss` - Utility-first CSS
-- `postcss` / `autoprefixer` - CSS processing
+- `framer-motion` - Animations
+- `lucide-react` - Icons
+- `sonner` - Toast notifications
 
-### Animations
-- `framer-motion` - Animation library
-
-### Icons
-- `lucide-react` - Icon library
+### Forms & Validation
+- `react-hook-form` / `@hookform/resolvers` - Forms
+- `zod` - Schema validation
 
 ---
 
 ## 🚧 Future Improvements
 
-- [ ] Add real backend API integration
-- [ ] Implement user authentication
-- [ ] Add Stripe payment processing
+- [x] User authentication (Clerk)
+- [x] Stripe payment processing & checkout
+- [x] Product search (`/products?search=`)
+- [x] Account dashboard & order history (`/account`, `/account/orders`)
+- [x] Address management (`/account/addresses`)
+- [x] Database-backed products & cart (Prisma + PostgreSQL; fallback to static data when DB unavailable)
 - [ ] Create admin dashboard
-- [ ] Add product search functionality
-- [ ] Implement wishlist persistence
-- [ ] Add order tracking
-- [ ] Create email notifications
-- [ ] Add product reviews system
-- [ ] Implement inventory management
+- [ ] Wishlist persistence (e.g. DB or Clerk metadata)
+- [ ] Email notifications (Resend)
+- [ ] Product reviews
+- [ ] Inventory management
 
 ---
 
@@ -342,9 +389,9 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ## 👩‍💻 Author
 
-**Rubab Zahra**
+**Hashmat Cheema**
 
-- GitHub: [@rubabzahra13](https://github.com/rubabzahra13)
+- GitHub: [@Hashmatcheema](https://github.com/Hashmatcheema)
 
 ---
 

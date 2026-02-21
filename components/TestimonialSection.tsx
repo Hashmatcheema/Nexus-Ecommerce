@@ -104,6 +104,7 @@ export default function TestimonialSection() {
                           src={reviews[currentIndex].avatar}
                           alt={reviews[currentIndex].name}
                           fill
+                          sizes="56px"
                           className="object-cover"
                         />
                       </div>

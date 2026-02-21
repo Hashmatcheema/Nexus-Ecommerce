@@ -64,20 +64,20 @@ export default function ProductGrid() {
                     src={product.image}
                     alt={product.name}
                     fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                   />
-                  
+
                   {/* Favorite button */}
                   <button
                     onClick={(e) => {
                       e.preventDefault()
                       toggleFavorite(product.id)
                     }}
-                    className={`absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-                      isFavorite(product.id)
+                    className={`absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center transition-all ${isFavorite(product.id)
                         ? 'bg-accent text-white'
                         : 'bg-white/80 backdrop-blur-sm text-ink hover:bg-white'
-                    }`}
+                      }`}
                   >
                     <Heart className={`w-4 h-4 ${isFavorite(product.id) ? 'fill-current' : ''}`} />
                   </button>

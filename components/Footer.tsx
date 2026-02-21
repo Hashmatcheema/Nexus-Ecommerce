@@ -77,6 +77,7 @@ export default function Footer() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  aria-label="Email address for newsletter"
                   className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-accent transition-colors"
                 />
               </div>
@@ -105,11 +106,11 @@ export default function Footer() {
               </h2>
             </Link>
             <p className="text-white/50 text-sm leading-relaxed mb-8 max-w-sm">
-              Curated luxury fashion for the modern individual. 
-              We believe in quality over quantity, timeless design 
+              Curated luxury fashion for the modern individual.
+              We believe in quality over quantity, timeless design
               over fleeting trends.
             </p>
-            
+
             {/* Contact Info */}
             <div className="space-y-3 mb-8">
               <a href="mailto:hello@nexus.com" className="flex items-center gap-3 text-white/50 hover:text-white transition-colors text-sm">
@@ -125,7 +126,7 @@ export default function Footer() {
                 New York, NY 10001
               </p>
             </div>
-            
+
             {/* Social Links */}
             <div className="flex gap-2">
               {socialLinks.map((social) => (
@@ -233,6 +234,7 @@ export default function Footer() {
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                 whileHover={{ y: -2 }}
                 className="hidden sm:flex items-center gap-2 text-white/30 text-sm hover:text-accent transition-colors"
+                aria-label="Back to top"
               >
                 Back to Top
                 <ArrowUpRight className="w-4 h-4" />

@@ -36,6 +36,7 @@ export default function FeaturesShowcase() {
           src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&q=80"
           alt="Fashion Atelier"
           fill
+          sizes="100vw"
           className="object-cover"
         />
         <div className="absolute inset-0 bg-ink/85" />
@@ -102,6 +103,7 @@ export default function FeaturesShowcase() {
                     src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80"
                     alt="Model in elegant outfit"
                     fill
+                    sizes="(max-width: 768px) 50vw, 33vw"
                     className="object-cover"
                   />
                 </div>
@@ -110,6 +112,7 @@ export default function FeaturesShowcase() {
                     src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=600&q=80"
                     alt="Fashion accessories"
                     fill
+                    sizes="(max-width: 768px) 50vw, 33vw"
                     className="object-cover"
                   />
                 </div>
@@ -120,6 +123,7 @@ export default function FeaturesShowcase() {
                     src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600&q=80"
                     alt="Clothing rack"
                     fill
+                    sizes="(max-width: 768px) 50vw, 33vw"
                     className="object-cover"
                   />
                 </div>
@@ -128,6 +132,7 @@ export default function FeaturesShowcase() {
                     src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&q=80"
                     alt="Shopping fashion"
                     fill
+                    sizes="(max-width: 768px) 50vw, 33vw"
                     className="object-cover"
                   />
                 </div>

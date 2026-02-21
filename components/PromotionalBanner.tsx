@@ -69,6 +69,7 @@ export default function PromotionalBanner() {
                 src={mainCard.image}
                 alt={mainCard.title}
                 fill
+                sizes="(max-width: 1024px) 100vw, 66vw"
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/10" />
@@ -115,6 +116,7 @@ export default function PromotionalBanner() {
                       src={card.image}
                       alt={card.title}
                       fill
+                      sizes="(max-width: 1024px) 50vw, 33vw"
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />

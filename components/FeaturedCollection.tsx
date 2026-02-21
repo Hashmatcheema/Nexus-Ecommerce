@@ -74,7 +74,7 @@ export default function FeaturedCollection() {
               </h2>
             </div>
           </motion.div>
-          
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -106,11 +106,12 @@ export default function FeaturedCollection() {
                 src={newArrivals[0].image}
                 alt={newArrivals[0].name}
                 fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 66vw"
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
                 priority
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0" />
-              
+
               {/* Badge */}
               {newArrivals[0].badge && (
                 <div className="absolute top-5 left-5">
@@ -157,10 +158,11 @@ export default function FeaturedCollection() {
                     src={product.image}
                     alt={product.name}
                     fill
+                    sizes="(max-width: 768px) 50vw, 33vw"
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0" />
-                  
+
                   {product.badge && (
                     <div className="absolute top-3 left-3">
                       <span className="px-2.5 py-1 bg-accent text-white text-[10px] font-bold rounded-full">
@@ -195,10 +197,11 @@ export default function FeaturedCollection() {
                   src={product.image}
                   alt={product.name}
                   fill
+                  sizes="(max-width: 768px) 50vw, 33vw"
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0" />
-                
+
                 <div className="absolute bottom-0 left-0 right-0 p-4 lg:p-5">
                   <span className="text-white/60 text-[10px] uppercase tracking-wider">{product.category}</span>
                   <h3 className="font-semibold text-white text-sm lg:text-base mt-0.5 group-hover:text-accent transition-colors">
@@ -218,7 +221,7 @@ export default function FeaturedCollection() {
             transition={{ duration: 0.6, delay: 0.5 }}
             className="col-span-12 lg:col-span-4"
           >
-            <Link 
+            <Link
               href="/products"
               className="group flex flex-col justify-center items-center h-[220px] lg:h-[280px] rounded-2xl bg-gradient-to-br from-accent to-orange-600 text-white p-6 hover:shadow-xl hover:shadow-accent/20 transition-all"
             >

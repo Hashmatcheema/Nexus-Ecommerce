@@ -64,7 +64,7 @@ export default function SalePage() {
 
   const filteredProducts = useMemo(() => {
     let filtered = [...saleProducts]
-    
+
     if (discountFilter !== 'all') {
       const minDiscount = Number(discountFilter)
       filtered = filtered.filter(p => p.discount >= minDiscount)
@@ -84,14 +84,14 @@ export default function SalePage() {
   return (
     <main className="min-h-screen bg-paper">
       <Navigation />
-      
+
       {/* Hero Section */}
       <section className="relative pt-20 lg:pt-24 overflow-hidden">
         {/* Background Pattern */}
         <div className="absolute inset-0 bg-gradient-to-br from-accent/5 via-paper to-accent/10" />
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-accent/10 rounded-full blur-[150px]" />
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-orange-200/30 rounded-full blur-[100px]" />
-        
+
         <div className="container-wide relative py-12 lg:py-20">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left Content */}
@@ -105,13 +105,13 @@ export default function SalePage() {
                 <Zap className="w-4 h-4" />
                 Flash Sale — Limited Time
               </div>
-              
+
               <h1 className="text-5xl lg:text-7xl font-display font-bold text-ink leading-[0.95] mb-6">
                 Up to
                 <span className="block text-accent">50% Off</span>
                 <span className="block text-ink/40">Everything</span>
               </h1>
-              
+
               <p className="text-lg text-muted mb-8 max-w-md">
                 Don&apos;t miss our biggest sale of the season. Premium fashion at unbeatable prices.
               </p>
@@ -152,6 +152,7 @@ export default function SalePage() {
                     src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=80"
                     alt="Sale"
                     fill
+                    sizes="(max-width: 1024px) 100vw, 50vw"
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-ink/60 to-transparent" />
@@ -160,13 +161,14 @@ export default function SalePage() {
                     <span className="px-3 py-1.5 bg-accent text-white text-sm font-bold rounded-full">-30%</span>
                   </div>
                 </div>
-                
+
                 {/* Small Cards */}
                 <div className="relative aspect-square rounded-2xl overflow-hidden group">
                   <Image
                     src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&q=80"
                     alt="Dresses"
                     fill
+                    sizes="(max-width: 1024px) 50vw, 25vw"
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-ink/60 to-transparent" />
@@ -177,12 +179,13 @@ export default function SalePage() {
                     <span className="px-2 py-1 bg-accent text-white text-xs font-bold rounded-full">-40%</span>
                   </div>
                 </div>
-                
+
                 <div className="relative aspect-square rounded-2xl overflow-hidden group">
                   <Image
                     src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=400&q=80"
                     alt="Outerwear"
                     fill
+                    sizes="(max-width: 1024px) 50vw, 25vw"
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-ink/60 to-transparent" />
@@ -255,11 +258,10 @@ export default function SalePage() {
                   <button
                     key={filter.value}
                     onClick={() => setDiscountFilter(String(filter.value))}
-                    className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${
-                      String(discountFilter) === String(filter.value)
+                    className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all whitespace-nowrap ${String(discountFilter) === String(filter.value)
                         ? 'bg-accent text-white shadow-lg shadow-accent/25'
                         : 'bg-gray-100 text-muted hover:bg-gray-200'
-                    }`}
+                      }`}
                   >
                     <Icon className="w-4 h-4" />
                     {filter.label}
@@ -316,7 +318,7 @@ export default function SalePage() {
       {/* Bottom CTA */}
       <section className="py-20 bg-gradient-to-r from-accent to-[#d97756] relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-30" />
-        
+
         <div className="container-wide relative text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

@@ -9,7 +9,6 @@ import PromotionalBanner from '@/components/PromotionalBanner'
 import TestimonialSection from '@/components/TestimonialSection'
 import CTASection from '@/components/CTASection'
 import Footer from '@/components/Footer'
-import MobileBottomNav from '@/components/MobileBottomNav'
 import CartDrawer from '@/components/CartDrawer'
 import AIAssistantOrb from '@/components/AIAssistantOrb'
 import AIAssistantModal from '@/components/AIAssistantModal'
@@ -19,7 +18,7 @@ export default function Home() {
   const { isAIModalOpen, setIsAIModalOpen } = useApp()
 
   return (
-    <main className="min-h-screen bg-paper pb-16 lg:pb-0">
+    <main className="min-h-screen bg-paper">
       <Navigation />
       
       {/* Hero Section with Stats */}
@@ -45,9 +44,6 @@ export default function Home() {
       
       {/* Footer */}
       <Footer />
-      
-      {/* Mobile Navigation */}
-      <MobileBottomNav />
       
       {/* Cart Drawer */}
       <CartDrawer />

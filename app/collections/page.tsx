@@ -15,7 +15,7 @@ export default function CollectionsPage() {
   return (
     <main className="min-h-screen bg-paper">
       <Navigation />
-      
+
       {/* Hero */}
       <section className="pt-24 lg:pt-32">
         <div className="container-wide">
@@ -52,11 +52,12 @@ export default function CollectionsPage() {
                   src={featuredCollection.image}
                   alt={featuredCollection.name}
                   fill
+                  sizes="100vw"
                   priority
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-ink/70 via-ink/40 to-transparent" />
-                
+
                 {/* Content */}
                 <div className="absolute inset-0 flex flex-col justify-end p-8 lg:p-12">
                   <motion.div
@@ -109,13 +110,14 @@ export default function CollectionsPage() {
                         src={collection.image}
                         alt={collection.name}
                         fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         className="object-cover transition-transform duration-700 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/20 to-transparent" />
-                      
+
                       {/* Hover Overlay */}
                       <div className="absolute inset-0 bg-accent/0 group-hover:bg-accent/20 transition-colors duration-300" />
-                      
+
                       {/* Content */}
                       <div className="absolute inset-0 p-6 lg:p-8 flex flex-col justify-between">
                         {/* Top */}
@@ -127,7 +129,7 @@ export default function CollectionsPage() {
                             <ArrowUpRight className="w-5 h-5 text-white" />
                           </div>
                         </div>
-                        
+
                         {/* Bottom */}
                         <div>
                           <h3 className={`${isLarge ? 'text-2xl lg:text-4xl' : 'text-xl lg:text-2xl'} font-display font-bold text-white mb-2`}>

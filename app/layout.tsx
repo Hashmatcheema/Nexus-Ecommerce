@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
+import { ClerkProvider } from '@clerk/nextjs'
 import './globals.css'
 import { AppProvider } from '@/contexts/AppContext'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { Toaster } from '@/components/ui/sonner'
 
 export const metadata: Metadata = {
   title: 'NEXUS | Next-Generation eCommerce',
@@ -21,13 +23,18 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className="scroll-smooth">
-      <body>
-        <ErrorBoundary>
-          <AppProvider>{children}</AppProvider>
-        </ErrorBoundary>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" className="scroll-smooth">
+        <body>
+          <ErrorBoundary>
+            <AppProvider>
+              {children}
+              <Toaster />
+            </AppProvider>
+          </ErrorBoundary>
+        </body>
+      </html>
+    </ClerkProvider>
   )
 }
 

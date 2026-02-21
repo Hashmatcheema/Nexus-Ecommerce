@@ -18,7 +18,7 @@ export default function Hero() {
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.1])
 
   return (
-    <section ref={containerRef} className="relative h-screen overflow-hidden">
+    <section ref={containerRef} className="relative h-screen overflow-hidden" style={{ position: 'relative' }}>
       {/* Full-screen background image */}
       <motion.div 
         style={{ scale }}
@@ -28,6 +28,7 @@ export default function Hero() {
           src="https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=2688&auto=format&fit=crop"
           alt="Fashion"
           fill
+          sizes="100vw"
           className="object-cover"
           priority
           quality={90}
@@ -108,42 +109,24 @@ export default function Hero() {
         </div>
       </motion.div>
 
-      {/* Bottom Stats Bar */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1, duration: 0.8 }}
-        className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent"
-      >
-        <div className="container-wide py-8">
-          <div className="flex flex-wrap justify-between items-center gap-8">
-            <div className="flex gap-12">
-              {[
-                { value: '50K+', label: 'Happy Clients' },
-                { value: '4.9', label: 'Rating' },
-                { value: '120+', label: 'Stores Worldwide' },
-              ].map((stat) => (
-                <div key={stat.label} className="text-center">
-                  <div className="text-2xl sm:text-3xl font-display font-bold text-white">{stat.value}</div>
-                  <div className="text-xs text-white/50 uppercase tracking-wider mt-1">{stat.label}</div>
-                </div>
-              ))}
-            </div>
-            
-            {/* Scroll indicator */}
-            <div className="hidden lg:flex items-center gap-4 text-white/50">
-              <span className="text-xs uppercase tracking-[0.2em]">Scroll</span>
-              <motion.div
-                animate={{ y: [0, 8, 0] }}
-                transition={{ repeat: Infinity, duration: 1.5 }}
-                className="w-6 h-10 border border-white/30 rounded-full flex justify-center pt-2"
-              >
-                <div className="w-1 h-2 bg-white/50 rounded-full" />
-              </motion.div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
+      {/* Scroll indicator — desktop only, no stats bar to avoid overlapping Shop Collection CTA */}
+      <div className="absolute bottom-8 left-0 right-0 hidden lg:flex justify-center">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1 }}
+          className="flex items-center gap-4 text-white/50"
+        >
+          <span className="text-xs uppercase tracking-[0.2em]">Scroll</span>
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ repeat: Infinity, duration: 1.5 }}
+            className="w-6 h-10 border border-white/30 rounded-full flex justify-center pt-2"
+          >
+            <div className="w-1 h-2 bg-white/50 rounded-full" />
+          </motion.div>
+        </motion.div>
+      </div>
     </section>
   )
 }

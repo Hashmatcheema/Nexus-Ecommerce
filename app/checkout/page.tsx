@@ -1,12 +1,25 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Navigation from '@/components/Navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowLeft, CreditCard, Truck, Shield, Check, Lock, ChevronRight, Sparkles, Gift, ArrowRight } from 'lucide-react'
 import { useApp } from '@/contexts/AppContext'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
+import { toast } from 'sonner'
+import clsx from 'clsx'
+import { loadStripe } from '@stripe/stripe-js'
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js'
+
+// Initialize Stripe only when publishable key is set (avoids "Expected publishable key to be string, got undefined")
+const stripePublishableKey = typeof process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY === 'string'
+  ? process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+  : ''
+const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null
 
 const steps = [
   { id: 1, name: 'Shipping', icon: Truck },
@@ -14,26 +27,269 @@ const steps = [
   { id: 3, name: 'Review', icon: Check },
 ]
 
+// Validation Schemas
+const shippingSchema = z.object({
+  firstName: z.string().min(2, 'First name is required'),
+  lastName: z.string().min(2, 'Last name is required'),
+  email: z.string().email('Invalid email address'),
+  address: z.string().min(5, 'Address is required'),
+  city: z.string().min(2, 'City is required'),
+  state: z.string().min(2, 'State is required'),
+  zip: z.string().min(4, 'Valid ZIP code is required'),
+})
+
+type ShippingFormData = z.infer<typeof shippingSchema>
+
+// Payment Form Component (internal to access Stripe hooks)
+function PaymentForm({
+  onSuccess,
+  onBack,
+  step,
+  setStep,
+  shippingData,
+  total
+}: {
+  onSuccess: () => void,
+  onBack: () => void,
+  step: number,
+  setStep: (s: number) => void,
+  shippingData: ShippingFormData,
+  total: number
+}) {
+  const stripe = useStripe()
+  const elements = useElements()
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!stripe || !elements) return
+
+    setLoading(true)
+    setErrorMessage(null)
+
+    // Trigger form validation and wallet collection
+    const { error: submitError } = await elements.submit()
+    if (submitError) {
+      setErrorMessage(submitError.message ?? 'An error occurred')
+      setLoading(false)
+      return
+    }
+
+    // Move to Review Step
+    setStep(3)
+    setLoading(false)
+  }
+
+  const handlePlaceOrder = async () => {
+    if (!stripe || !elements) return
+
+    setLoading(true)
+
+    const { error } = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: `${window.location.origin}/checkout/success`, // In real app, this page handles completion
+        payment_method_data: {
+          billing_details: {
+            name: `${shippingData.firstName} ${shippingData.lastName}`,
+            email: shippingData.email,
+            address: {
+              line1: shippingData.address,
+              city: shippingData.city,
+              state: shippingData.state,
+              postal_code: shippingData.zip,
+              country: 'US', // Hardcoded for now
+            }
+          }
+        }
+      },
+      redirect: 'if_required', // Avoid redirect if not 3DS
+    })
+
+    if (error) {
+      setErrorMessage(error.message ?? 'Payment failed')
+      setLoading(false)
+    } else {
+      // Success!
+      onSuccess()
+    }
+  }
+
+  return (
+    <>
+      {/* Step 2: Payment UI */}
+      {step === 2 && (
+        <motion.div
+          key="payment"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          className="space-y-6"
+        >
+          <h2 className="text-2xl font-display font-bold">Payment Method</h2>
+
+          <form onSubmit={handleSubmit}>
+            <div className="bg-gray-50 p-4 rounded-xl border border-border">
+              <PaymentElement />
+            </div>
+
+            {errorMessage && (
+              <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
+                {errorMessage}
+              </div>
+            )}
+
+            <div className="flex gap-4 mt-6">
+              <button type="button" onClick={onBack} className="btn-outline flex-1">
+                Back
+              </button>
+              <button
+                type="submit"
+                disabled={!stripe || loading}
+                className="btn-primary flex-1 flex items-center justify-center gap-2 group"
+              >
+                {loading ? 'Processing...' : 'Review Order'}
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+          </form>
+        </motion.div>
+      )}
+
+      {/* Step 3: Review UI */}
+      {step === 3 && (
+        <motion.div
+          key="review"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          className="space-y-6"
+        >
+          <h2 className="text-2xl font-display font-bold">Review Order</h2>
+
+          <div className="bg-gray-50 rounded-2xl p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <Truck className="w-5 h-5 text-accent" />
+              <h3 className="font-semibold">Shipping Address</h3>
+            </div>
+            <div className="text-muted text-sm pl-8">
+              <p>{shippingData.firstName} {shippingData.lastName}</p>
+              <p>{shippingData.address}</p>
+              <p>{shippingData.city}, {shippingData.state} {shippingData.zip}</p>
+            </div>
+          </div>
+
+          <div className="bg-gray-50 rounded-2xl p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <CreditCard className="w-5 h-5 text-accent" />
+              <h3 className="font-semibold">Payment Method</h3>
+            </div>
+            <p className="text-muted text-sm pl-8 font-mono">
+              Card details entered securely via Stripe
+            </p>
+          </div>
+
+          {errorMessage && (
+            <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
+              {errorMessage}
+            </div>
+          )}
+
+          <div className="flex gap-4">
+            <button type="button" onClick={() => setStep(2)} className="btn-outline flex-1">
+              Back
+            </button>
+            <button
+              type="button"
+              onClick={handlePlaceOrder}
+              disabled={loading}
+              className="btn-primary flex-1 flex items-center justify-center gap-2 group"
+            >
+              {loading ? (
+                'Processing...'
+              ) : (
+                <>
+                  <Lock className="w-4 h-4" />
+                  Place Order — ${total.toFixed(2)}
+                </>
+              )}
+            </button>
+          </div>
+        </motion.div>
+      )}
+    </>
+  )
+}
+
 export default function CheckoutPage() {
   const { cart, cartTotal, clearCart } = useApp()
   const [step, setStep] = useState(1)
   const [orderPlaced, setOrderPlaced] = useState(false)
   const [promoCode, setPromoCode] = useState('')
   const [promoApplied, setPromoApplied] = useState(false)
+  const [clientSecret, setClientSecret] = useState<string | null>(null)
+
+  // Forms
+  const shippingForm = useForm<ShippingFormData>({
+    resolver: zodResolver(shippingSchema),
+    defaultValues: {
+      firstName: 'Sarah',
+      lastName: 'Johnson',
+      email: 'sarah.johnson@email.com',
+      address: '123 Fashion Avenue',
+      city: 'New York',
+      state: 'NY',
+      zip: '10001',
+    },
+  })
 
   const shipping = cartTotal > 100 ? 0 : 12
   const discount = promoApplied ? cartTotal * 0.1 : 0
   const tax = (cartTotal - discount) * 0.08
   const total = cartTotal - discount + shipping + tax
+  const orderNumber = `#ORD-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`
 
-  const handlePlaceOrder = () => {
+  const handleShippingSubmit = async (data: ShippingFormData) => {
+    // Create Payment Intent on Server
+    try {
+      const res = await fetch('/api/create-payment-intent', {
+        method: 'POST',
+      })
+      const json = await res.json()
+      if (json.clientSecret) {
+        setClientSecret(json.clientSecret)
+        setStep(2)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      } else {
+        toast.error('Failed to initialize payment')
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error('Failed to connect to server')
+    }
+  }
+
+  const handleOrderSuccess = () => {
+    toast.success('Order placed successfully!', {
+      description: `Order ${orderNumber} has been confirmed.`,
+    })
     setOrderPlaced(true)
     clearCart()
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const applyPromo = () => {
     if (promoCode.toLowerCase() === 'extra10') {
       setPromoApplied(true)
+      toast.success('Promo code applied!', {
+        description: 'You saved 10% on your order.',
+      })
+    } else {
+      toast.error('Invalid promo code', {
+        description: 'Try "EXTRA10"',
+      })
     }
   }
 
@@ -56,7 +312,7 @@ export default function CheckoutPage() {
             >
               <Check className="w-12 h-12 text-white" />
             </motion.div>
-            
+
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -66,11 +322,11 @@ export default function CheckoutPage() {
               <p className="text-muted text-lg mb-6">
                 Thank you for your order. We&apos;ve sent a confirmation email with your order details.
               </p>
-              
+
               <div className="bg-white rounded-2xl p-6 border border-border mb-8">
                 <p className="text-sm text-muted mb-2">Order Number</p>
                 <p className="font-mono text-2xl font-bold text-accent">
-                  #ORD-{new Date().getFullYear()}-{Math.floor(Math.random() * 10000).toString().padStart(4, '0')}
+                  {orderNumber}
                 </p>
               </div>
 
@@ -113,10 +369,9 @@ export default function CheckoutPage() {
   return (
     <main className="min-h-screen bg-gray-50">
       <Navigation />
-      
+
       <section className="pt-24 lg:pt-28 pb-12">
         <div className="container-wide">
-          {/* Back Link */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -144,25 +399,22 @@ export default function CheckoutPage() {
                     {steps.map((s, index) => (
                       <div key={s.id} className="flex items-center">
                         <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
-                            step > s.id 
-                              ? 'bg-green-500 text-white' 
-                              : step === s.id 
-                                ? 'bg-accent text-white shadow-lg shadow-accent/30' 
-                                : 'bg-gray-200 text-muted'
-                          }`}>
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${step > s.id
+                            ? 'bg-green-500 text-white'
+                            : step === s.id
+                              ? 'bg-accent text-white shadow-lg shadow-accent/30'
+                              : 'bg-gray-200 text-muted'
+                            }`}>
                             {step > s.id ? <Check className="w-5 h-5" /> : <s.icon className="w-5 h-5" />}
                           </div>
-                          <span className={`hidden sm:block text-sm font-medium ${
-                            step >= s.id ? 'text-ink' : 'text-muted'
-                          }`}>
+                          <span className={`hidden sm:block text-sm font-medium ${step >= s.id ? 'text-ink' : 'text-muted'
+                            }`}>
                             {s.name}
                           </span>
                         </div>
                         {index < steps.length - 1 && (
-                          <div className={`w-12 lg:w-24 h-0.5 mx-4 ${
-                            step > s.id ? 'bg-green-500' : 'bg-gray-200'
-                          }`} />
+                          <div className={`w-12 lg:w-24 h-0.5 mx-4 ${step > s.id ? 'bg-green-500' : 'bg-gray-200'
+                            }`} />
                         )}
                       </div>
                     ))}
@@ -182,198 +434,139 @@ export default function CheckoutPage() {
                         className="space-y-6"
                       >
                         <h2 className="text-2xl font-display font-bold">Shipping Address</h2>
-                        
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium mb-2">First Name</label>
+
+                        <form id="shipping-form" onSubmit={shippingForm.handleSubmit(handleShippingSubmit)}>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium mb-2">First Name</label>
+                              <input
+                                {...shippingForm.register('firstName')}
+                                type="text"
+                                className={clsx(
+                                  "w-full px-4 py-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition-all",
+                                  shippingForm.formState.errors.firstName ? 'border-red-500' : 'border-border'
+                                )}
+                              />
+                              {shippingForm.formState.errors.firstName && (
+                                <p className="text-red-500 text-xs mt-1">{shippingForm.formState.errors.firstName.message}</p>
+                              )}
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-2">Last Name</label>
+                              <input
+                                {...shippingForm.register('lastName')}
+                                type="text"
+                                className={clsx(
+                                  "w-full px-4 py-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition-all",
+                                  shippingForm.formState.errors.lastName ? 'border-red-500' : 'border-border'
+                                )}
+                              />
+                              {shippingForm.formState.errors.lastName && (
+                                <p className="text-red-500 text-xs mt-1">{shippingForm.formState.errors.lastName.message}</p>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="mt-4">
+                            <label className="block text-sm font-medium mb-2">Email</label>
                             <input
-                              type="text"
-                              defaultValue="Sarah"
-                              className="w-full px-4 py-3 bg-gray-50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
+                              {...shippingForm.register('email')}
+                              type="email"
+                              className={clsx(
+                                "w-full px-4 py-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition-all",
+                                shippingForm.formState.errors.email ? 'border-red-500' : 'border-border'
+                              )}
                             />
+                            {shippingForm.formState.errors.email && (
+                              <p className="text-red-500 text-xs mt-1">{shippingForm.formState.errors.email.message}</p>
+                            )}
                           </div>
-                          <div>
-                            <label className="block text-sm font-medium mb-2">Last Name</label>
+
+                          <div className="mt-4">
+                            <label className="block text-sm font-medium mb-2">Address</label>
                             <input
+                              {...shippingForm.register('address')}
                               type="text"
-                              defaultValue="Johnson"
-                              className="w-full px-4 py-3 bg-gray-50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
+                              className={clsx(
+                                "w-full px-4 py-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition-all",
+                                shippingForm.formState.errors.address ? 'border-red-500' : 'border-border'
+                              )}
                             />
+                            {shippingForm.formState.errors.address && (
+                              <p className="text-red-500 text-xs mt-1">{shippingForm.formState.errors.address.message}</p>
+                            )}
                           </div>
-                        </div>
-                        
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Email</label>
-                          <input
-                            type="email"
-                            defaultValue="sarah.johnson@email.com"
-                            className="w-full px-4 py-3 bg-gray-50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
-                          />
-                        </div>
 
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Address</label>
-                          <input
-                            type="text"
-                            defaultValue="123 Fashion Avenue"
-                            className="w-full px-4 py-3 bg-gray-50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium mb-2">City</label>
-                            <input
-                              type="text"
-                              defaultValue="New York"
-                              className="w-full px-4 py-3 bg-gray-50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
-                            />
+                          <div className="grid grid-cols-3 gap-4 mt-4">
+                            <div>
+                              <label className="block text-sm font-medium mb-2">City</label>
+                              <input
+                                {...shippingForm.register('city')}
+                                type="text"
+                                className={clsx(
+                                  "w-full px-4 py-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition-all",
+                                  shippingForm.formState.errors.city ? 'border-red-500' : 'border-border'
+                                )}
+                              />
+                              {shippingForm.formState.errors.city && (
+                                <p className="text-red-500 text-xs mt-1">{shippingForm.formState.errors.city.message}</p>
+                              )}
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-2">State</label>
+                              <input
+                                {...shippingForm.register('state')}
+                                type="text"
+                                className={clsx(
+                                  "w-full px-4 py-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition-all",
+                                  shippingForm.formState.errors.state ? 'border-red-500' : 'border-border'
+                                )}
+                              />
+                              {shippingForm.formState.errors.state && (
+                                <p className="text-red-500 text-xs mt-1">{shippingForm.formState.errors.state.message}</p>
+                              )}
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium mb-2">ZIP</label>
+                              <input
+                                {...shippingForm.register('zip')}
+                                type="text"
+                                className={clsx(
+                                  "w-full px-4 py-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition-all",
+                                  shippingForm.formState.errors.zip ? 'border-red-500' : 'border-border'
+                                )}
+                              />
+                              {shippingForm.formState.errors.zip && (
+                                <p className="text-red-500 text-xs mt-1">{shippingForm.formState.errors.zip.message}</p>
+                              )}
+                            </div>
                           </div>
-                          <div>
-                            <label className="block text-sm font-medium mb-2">State</label>
-                            <input
-                              type="text"
-                              defaultValue="NY"
-                              className="w-full px-4 py-3 bg-gray-50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium mb-2">ZIP</label>
-                            <input
-                              type="text"
-                              defaultValue="10001"
-                              className="w-full px-4 py-3 bg-gray-50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
-                            />
-                          </div>
-                        </div>
 
-                        <button onClick={() => setStep(2)} className="btn-primary w-full flex items-center justify-center gap-2 group">
-                          Continue to Payment
-                          <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                        </button>
-                      </motion.div>
-                    )}
-
-                    {/* Step 2: Payment */}
-                    {step === 2 && (
-                      <motion.div
-                        key="payment"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        className="space-y-6"
-                      >
-                        <h2 className="text-2xl font-display font-bold">Payment Method</h2>
-
-                        {/* Card Selection */}
-                        <div className="p-4 bg-accent-light border-2 border-accent rounded-xl flex items-center gap-4">
-                          <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center">
-                            <CreditCard className="w-5 h-5 text-white" />
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-medium">Credit / Debit Card</p>
-                            <p className="text-sm text-muted">Visa, Mastercard, Amex</p>
-                          </div>
-                          <div className="w-5 h-5 rounded-full bg-accent flex items-center justify-center">
-                            <Check className="w-3 h-3 text-white" />
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Card Number</label>
-                          <input
-                            type="text"
-                            placeholder="1234 5678 9012 3456"
-                            defaultValue="4242 4242 4242 4242"
-                            className="w-full px-4 py-3 bg-gray-50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all font-mono"
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium mb-2">Expiry Date</label>
-                            <input
-                              type="text"
-                              placeholder="MM/YY"
-                              defaultValue="12/25"
-                              className="w-full px-4 py-3 bg-gray-50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all font-mono"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium mb-2">CVC</label>
-                            <input
-                              type="text"
-                              placeholder="123"
-                              defaultValue="123"
-                              className="w-full px-4 py-3 bg-gray-50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all font-mono"
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Name on Card</label>
-                          <input
-                            type="text"
-                            defaultValue="Sarah Johnson"
-                            className="w-full px-4 py-3 bg-gray-50 border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
-                          />
-                        </div>
-
-                        <div className="flex gap-4">
-                          <button onClick={() => setStep(1)} className="btn-outline flex-1">
-                            Back
-                          </button>
-                          <button onClick={() => setStep(3)} className="btn-primary flex-1 flex items-center justify-center gap-2 group">
-                            Review Order
+                          <button type="submit" className="btn-primary w-full flex items-center justify-center gap-2 group mt-6">
+                            Continue to Payment
                             <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                           </button>
-                        </div>
+                        </form>
                       </motion.div>
                     )}
 
-                    {/* Step 3: Review */}
-                    {step === 3 && (
-                      <motion.div
-                        key="review"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
-                        className="space-y-6"
-                      >
-                        <h2 className="text-2xl font-display font-bold">Review Order</h2>
-                        
-                        <div className="bg-gray-50 rounded-2xl p-5">
-                          <div className="flex items-center gap-3 mb-3">
-                            <Truck className="w-5 h-5 text-accent" />
-                            <h3 className="font-semibold">Shipping Address</h3>
-                          </div>
-                          <p className="text-muted text-sm pl-8">
-                            Sarah Johnson<br />
-                            123 Fashion Avenue<br />
-                            New York, NY 10001
-                          </p>
-                        </div>
-
-                        <div className="bg-gray-50 rounded-2xl p-5">
-                          <div className="flex items-center gap-3 mb-3">
-                            <CreditCard className="w-5 h-5 text-accent" />
-                            <h3 className="font-semibold">Payment Method</h3>
-                          </div>
-                          <p className="text-muted text-sm pl-8 font-mono">
-                            •••• •••• •••• 4242
-                          </p>
-                        </div>
-
-                        <div className="flex gap-4">
-                          <button onClick={() => setStep(2)} className="btn-outline flex-1">
-                            Back
-                          </button>
-                          <button onClick={handlePlaceOrder} className="btn-primary flex-1 flex items-center justify-center gap-2 group">
-                            <Lock className="w-4 h-4" />
-                            Place Order — ${total.toFixed(2)}
-                          </button>
-                        </div>
-                      </motion.div>
+                    {/* Steps 2 & 3: Wrapped in Elements (only when Stripe key is configured) */}
+                    {(step === 2 || step === 3) && clientSecret && stripePromise && (
+                      <Elements stripe={stripePromise} options={{ clientSecret }}>
+                        <PaymentForm
+                          onSuccess={handleOrderSuccess}
+                          onBack={() => setStep(step - 1)}
+                          step={step}
+                          setStep={setStep}
+                          shippingData={shippingForm.getValues()}
+                          total={total}
+                        />
+                      </Elements>
+                    )}
+                    {(step === 2 || step === 3) && clientSecret && !stripePromise && (
+                      <div className="p-6 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-sm">
+                        Payment is not configured. Add <code className="bg-amber-100 px-1 rounded">NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</code> to your <code className="bg-amber-100 px-1 rounded">.env</code> to enable checkout.
+                      </div>
                     )}
                   </AnimatePresence>
                 </div>
@@ -404,7 +597,7 @@ export default function CheckoutPage() {
                   <Sparkles className="w-5 h-5 text-accent" />
                   Order Summary
                 </h2>
-                
+
                 {/* Cart Items */}
                 <div className="space-y-4 mb-6 max-h-64 overflow-y-auto">
                   {cart.map((item) => (
@@ -414,6 +607,7 @@ export default function CheckoutPage() {
                           src={item.image}
                           alt={item.name}
                           fill
+                          sizes="64px"
                           className="object-cover"
                         />
                         <div className="absolute -top-1 -right-1 w-5 h-5 bg-ink text-white text-[10px] font-bold rounded-full flex items-center justify-center">
