@@ -16,8 +16,7 @@
 /build
 
 # environment (secrets)
-.env
-.env*.local
+
 
 # debug
 npm-debug.log*
@@ -44,3 +43,6 @@ prisma_debug.log
 
 # IDE (optional: remove .vscode if you want to share workspace settings)
 .idea
+
+# clerk configuration (can include secrets)
+/.clerk/

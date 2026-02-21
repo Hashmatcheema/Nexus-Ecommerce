@@ -12,8 +12,8 @@ const fallbacks = {
   DATABASE_URL: 'postgresql://postgres:password@localhost:5432/nexus_ecommerce?schema=public',
 
   // Clerk (public key is safe to expose; secret must stay server-side only)
-  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: 'pk_test_build_placeholder',
-  CLERK_SECRET_KEY: '',
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: 'pk_test_ZmluZXItdmlwZXItNjcuY2xlcmsuYWNjb3VudHMuZGV2JA',
+  CLERK_SECRET_KEY: 'sk_test_OpsPDCpUIkhv70CAra9we365Hy5EJkj2y9ij39OTp5',
   NEXT_PUBLIC_CLERK_SIGN_IN_URL: '/sign-in',
   NEXT_PUBLIC_CLERK_SIGN_UP_URL: '/sign-up',
 
