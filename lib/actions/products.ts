@@ -95,7 +95,8 @@ export async function getProducts(params: GetProductsParams) {
             include: { category: true, variants: true },
         })
 
-        const formattedProducts = products.map((p) => {
+        type ProductWithRelations = (typeof products)[number]
+        const formattedProducts = products.map((p: ProductWithRelations) => {
             const idAsNum = parseInt(p.id)
             return {
                 id: isNaN(idAsNum) ? 0 : idAsNum,
