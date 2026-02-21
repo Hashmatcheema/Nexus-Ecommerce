@@ -57,7 +57,8 @@ export async function POST(req: NextRequest) {
                 }
 
                 // 2. Calculate final totals (redundant check, but good for data integrity)
-                const total = cartItems.reduce((sum: number, item) => {
+                type CartItemWithRelations = (typeof cartItems)[number]
+                const total = cartItems.reduce((sum: number, item: CartItemWithRelations) => {
                     const price = item.variant ? (item.product.price.toNumber() + item.variant.priceDiff.toNumber()) : item.product.price.toNumber()
                     return sum + (price * item.quantity)
                 }, 0)

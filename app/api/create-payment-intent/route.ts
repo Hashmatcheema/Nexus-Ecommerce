@@ -35,7 +35,8 @@ export async function POST(req: NextRequest) {
         }
 
         // Calculate total on server
-        const total = cart.items.reduce((sum: number, item) => {
+        type CartItemWithRelations = (typeof cart.items)[number]
+        const total = cart.items.reduce((sum: number, item: CartItemWithRelations) => {
             const price = item.variant ? (item.product.price.toNumber() + item.variant.priceDiff.toNumber()) : item.product.price.toNumber()
             return sum + (price * item.quantity)
         }, 0)
