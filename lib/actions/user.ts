@@ -32,10 +32,12 @@ export async function getUserDashboardData() {
         }
     })
 
-    const orders = (dbUser?.orders || []).map(order => ({
+    type OrderWithItems = NonNullable<typeof dbUser>['orders'][number]
+    type OrderItemWithProduct = OrderWithItems['items'][number]
+    const orders = (dbUser?.orders || []).map((order: OrderWithItems) => ({
         ...order,
         total: Number(order.total),
-        items: order.items.map(item => ({
+        items: order.items.map((item: OrderItemWithProduct) => ({
             ...item,
             price: Number(item.price)
         }))
@@ -76,10 +78,12 @@ export async function getUserOrders() {
         }
     })
 
-    return (dbUser?.orders || []).map(order => ({
+    type OrderWithItems = NonNullable<typeof dbUser>['orders'][number]
+    type OrderItemWithProduct = OrderWithItems['items'][number]
+    return (dbUser?.orders || []).map((order: OrderWithItems) => ({
         ...order,
         total: Number(order.total),
-        items: order.items.map(item => ({
+        items: order.items.map((item: OrderItemWithProduct) => ({
             ...item,
             price: Number(item.price)
         }))
