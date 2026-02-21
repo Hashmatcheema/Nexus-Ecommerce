@@ -3,7 +3,7 @@ import Navigation from '@/components/Navigation'
 import ProductCard from '@/components/ProductCard'
 import Footer from '@/components/Footer'
 import CartDrawer from '@/components/CartDrawer'
-import { getProducts, getCategories } from '@/lib/actions/products'
+import { getProducts, getCategories, type Product } from '@/lib/actions/products'
 import Pagination from '@/components/products/Pagination'
 import ProductFilters from '@/components/products/ProductFilters'
 import { Sparkles, SlidersHorizontal } from 'lucide-react'
@@ -61,7 +61,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         <div className="container-wide">
           {products.length > 0 ? (
             <div className={`grid grid-cols-2 gap-4 lg:gap-8 ${view === '3' ? 'lg:grid-cols-3' : 'lg:grid-cols-4'}`}>
-              {products.map((product, index) => (
+              {products.map((product: Product, index) => (
                 <ProductCard
                   key={product.id}
                   product={product}

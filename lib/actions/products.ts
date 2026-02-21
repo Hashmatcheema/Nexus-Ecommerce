@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma'
 import { productFilterSchema, ProductFilterParams } from '@/lib/validation'
 import { allProducts, categories as staticCategories } from '@/lib/data'
 
-interface Product {
+export interface Product {
     id: number
     name: string
     price: number
