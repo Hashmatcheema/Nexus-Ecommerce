@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import Stripe from 'stripe'
 import { headers } from 'next/headers'
+import { env } from '@/lib/env'
 
 type PrismaTransaction = Parameters<Parameters<typeof prisma.$transaction>[0]>[0]
 
 function getStripe(): Stripe {
-    const key = process.env.STRIPE_SECRET_KEY
+    const key = env.STRIPE_SECRET_KEY
     if (!key) throw new Error('STRIPE_SECRET_KEY is not set')
     return new Stripe(key, { apiVersion: '2026-01-28.clover' })
 }
@@ -14,7 +15,7 @@ function getStripe(): Stripe {
 export async function POST(req: NextRequest) {
     const body = await req.text()
     const sig = headers().get('stripe-signature') as string
-    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET
+    const endpointSecret = env.STRIPE_WEBHOOK_SECRET
 
     let event: Stripe.Event
 

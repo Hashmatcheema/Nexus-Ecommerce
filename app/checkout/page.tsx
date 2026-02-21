@@ -15,10 +15,10 @@ import clsx from 'clsx'
 import { loadStripe } from '@stripe/stripe-js'
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js'
 
-// Initialize Stripe only when publishable key is set (avoids "Expected publishable key to be string, got undefined")
-const stripePublishableKey = typeof process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY === 'string'
-  ? process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-  : ''
+import { env } from '@/lib/env'
+
+// Initialize Stripe from central env (lib/env.ts)
+const stripePublishableKey = env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null
 
 const steps = [

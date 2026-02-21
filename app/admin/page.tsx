@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { motion } from 'framer-motion'
 import {
   LayoutDashboard,
@@ -13,6 +14,7 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Activity,
+  Key,
 } from 'lucide-react'
 
 const metrics = [
@@ -155,9 +157,18 @@ export default function AdminDashboard() {
         <div className="p-8 lg:p-12">
           {activeTab === 'overview' && (
             <div className="space-y-8">
-              <div>
-                <h2 className="text-display-3 font-bold mb-2">Dashboard Overview</h2>
-                <p className="text-white/60">Welcome back! Here's what's happening today.</p>
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-display-3 font-bold mb-2">Dashboard Overview</h2>
+                  <p className="text-white/60">Welcome back! Here's what's happening today.</p>
+                </div>
+                <Link
+                  href="/admin/env"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl glass-effect hover:bg-white/10 transition-colors text-sm"
+                >
+                  <Key className="w-4 h-4" />
+                  View env vars
+                </Link>
               </div>
 
               {/* Metrics */}
